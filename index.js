@@ -6,10 +6,11 @@ var progress = require('progress-stream')
 var fileReader = require('filereader-stream')
 var path = require('path')
 var encoding = require('dat-encoding')
-
 var QueuedFileModel = require('./model.js')
 
-function HyperdriveWriteQueue (files, archive, options) {
+module.exports = HyperdriveImportQueue
+
+function HyperdriveImportQueue (files, archive, options) {
   if (!(this instanceof HyperdriveWriteQueue)) return new HyperdriveWriteQueue(files, archive, options)
 
   var chunkSize = options.chunkSize || 4*1024
@@ -56,5 +57,4 @@ function HyperdriveWriteQueue (files, archive, options) {
       }
     )
   }
-
 }

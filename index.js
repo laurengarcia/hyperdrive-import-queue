@@ -11,8 +11,9 @@ var QueuedFileModel = require('./model.js')
 module.exports = HyperdriveImportQueue
 
 function HyperdriveImportQueue (files, archive, options) {
-  if (!(this instanceof HyperdriveWriteQueue)) return new HyperdriveWriteQueue(files, archive, options)
+  if (!(this instanceof HyperdriveImportQueue)) return new HyperdriveImportQueue(files, archive, options)
 
+  var cwd = options.cwd || ''
   var chunkSize = options.chunkSize || 4*1024
   var progressInterval = options.progressInterval || 100
   var onQueueNewFile = options.onQueueNewFile || null
@@ -21,8 +22,8 @@ function HyperdriveImportQueue (files, archive, options) {
   var onCompleteAll = options.onCompleteAll || null
 
   files.forEach(function (file) {
-    var _file = new QueuedFileModel(file)
-    onQueueNewFile(file)
+    var fileModel = new QueuedFileModel(file)
+    onQueueNewFile(null, fileModel)
   })
   var i = 0
   loop()
@@ -44,6 +45,7 @@ function HyperdriveImportQueue (files, archive, options) {
     pump(
       stream,
       chunker(chunkSize),
+      file.progressListener,
       archive.createFileWriteStream(entry),
       function (err) {
         if (err) {

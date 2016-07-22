@@ -1,0 +1,27 @@
+{
+  "name": "hyperdrive-import-queue",
+  "version": "1.0.0",
+  "description": "A hyperdrive import queue that emits progress events.",
+  "license": "MIT",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:laurengarcia/hyperdrive-import-queue.git"
+  },
+  "bugs": {
+    "url": "https://github.com/laurengarcia/hyperdrive-import-queue/issues"
+  },
+  "keywords": [
+    "dat",
+    "hyperdrive",
+    "progress"
+  ],
+  "dependencies": {
+    "choppa": "^1.0.2",
+    "dat-encoding": "^2.0.2",
+    "filereader-stream": "^1.0.0",
+    "path": "^0.12.7",
+    "progress-stream": "^1.2.0",
+    "pump": "^1.0.1"
+  }
+}

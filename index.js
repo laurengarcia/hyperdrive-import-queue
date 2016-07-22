@@ -1,6 +1,6 @@
 // TODO:
 // use `rabin` module for non-browser implementation https://github.com/mafintosh/hyperdrive/blob/master/archive.js#L6
-var choppa = require('choppa')
+var chunker = require('choppa')
 var pump = require('pump')
 var progress = require('progress-stream')
 var fileReader = require('filereader-stream')
@@ -43,7 +43,7 @@ function HyperdriveImportQueue (files, archive, options) {
     onFileWriteBegin(null, file)
     pump(
       stream,
-      choppa(chunkSize),
+      chunker(chunkSize),
       archive.createFileWriteStream(entry),
       function (err) {
         if (err) {

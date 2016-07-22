@@ -5,7 +5,6 @@ var pump = require('pump')
 var progress = require('progress-stream')
 var fileReader = require('filereader-stream')
 var path = require('path')
-var encoding = require('dat-encoding')
 var QueuedFileModel = require('./model.js')
 
 module.exports = HyperdriveImportQueue
@@ -30,13 +29,13 @@ function HyperdriveImportQueue (files, archive, options) {
 
   function loop () {
     if (i === files.length) {
-      return console.log('added files to ', encoding.encode(archive.key), files)
+      return console.log('added files to ', archive.key.toString('hex'), files)
       onCompleteAll(null)
     }
     var file = files[i++]
     var stream = fileReader(file)
     var entry = {
-      name: path.join(cwd, file.fullPath),
+      name: path.join(cwd, file.fullPath.slice(1)),
       mtime: Date.now(),
       ctime: Date.now()
     }

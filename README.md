@@ -5,29 +5,31 @@ Takes an array of files, chunks and writes them to a [hyperdrive archive](https:
 
 ## Usage
 arguments:
-@files: array of files to import/write to archive
-@archive: hyperdrive archive
-@options: object -- see below
+* @files: array of files to import/write to archive
+* @archive: hyperdrive archive
+* @options: object -- see below
 ```
 hyperdriveImportQueue(files, archive, {
-  cwd: '',
-  progressInterval: 100,
-  chunkSize: 4*1024,
+  cwd: '',               // defaults to ''
+  progressInterval: 100, // defaults to 100ms
+  chunkSize: 4*1024,     // defaults to 4*1024
   onQueueNewFile: function (err, file) {
     // add file to your queue UI
   },
   onFileWriteBegin: function (err, file) {
     // you may now start incrementing your progress bar UI at this point
     // by attaching your progress listener callback to the `progress` event:
-    // file.progressListener.on('progress', function (progress) {
-        // increment your progress bars here
-    // })
+    file.progressListener.on('progress', function (progress) {
+     // increment your progress bars here using the `progress` argument data
+    })
   },
   onFileWriteComplete: function (err, file) {
-    // file is now written to hyperdrive archive
+    // a single file has now been written to the hyperdrive archive
+    // the next file in the queue will start writing and trigger a new
+    // `onFileWriteBegin` callback to fire
   },
-  onCompleteAll: function () {
-    // whatevs
+  onCompleteAll: function (err, files) {
+    // do whatever you like
   }
 })
 ```

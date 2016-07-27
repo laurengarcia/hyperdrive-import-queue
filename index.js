@@ -29,8 +29,8 @@ function HyperdriveImportQueue (files, archive, options) {
 
   function loop () {
     if (i === files.length) {
-      return console.log('added files to ', archive.key.toString('hex'), files)
-      onCompleteAll(null)
+      console.log('added files to ', archive.key.toString('hex'), files)
+      return onCompleteAll(null, files)
     }
     var file = files[i++]
     var stream = fileReader(file)

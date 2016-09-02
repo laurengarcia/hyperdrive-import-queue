@@ -6,55 +6,72 @@ var progress = require('progress-stream')
 var fileReader = require('filereader-stream')
 var path = require('path')
 var QueuedFileModel = require('./model.js')
+var noop = function () {}
 
 module.exports = HyperdriveImportQueue
 
 function HyperdriveImportQueue (files, archive, options) {
-  if (!(this instanceof HyperdriveImportQueue)) return new HyperdriveImportQueue(files, archive, options)
+  if (!(this instanceof HyperdriveImportQueue)) {
+    return new HyperdriveImportQueue(files, archive, options)
+  }
 
-  var cwd = options.cwd || ''
-  var chunkSize = options.chunkSize || 4*1024
-  var progressInterval = options.progressInterval || 100
-  var onQueueNewFile = options.onQueueNewFile || null
-  var onFileWriteBegin = options.onFileWriteBegin || null
-  var onFileWriteComplete = options.onFileWriteComplete || null
-  var onCompleteAll = options.onCompleteAll || null
+  this.queue = []
+  this.archive = archive
+  this.cwd = options.cwd || ''
+  this.chunkSize = options.chunkSize || 4*1024
+  this.progressInterval = options.progressInterval || 100
 
+  this.onQueueNewFile = options.onQueueNewFile || noop
+  this.onFileWriteBegin = options.onFileWriteBegin || noop
+  this.onFileWriteComplete = options.onFileWriteComplete || noop
+  this.onCompleteAll = options.onCompleteAll || noop
+
+  if (files) this.add(files)
+}
+
+HyperdriveImportQueue.prototype.add = function (files, cwd) {
+  var self = this
+  var isWriting = false
+  if (cwd) this.cwd = cwd
   files.forEach(function (file) {
-    var fileModel = new QueuedFileModel(file)
-    onQueueNewFile(null, fileModel)
+    var queueFile = new QueuedFileModel(file)
+    self.queue.push(queueFile)
+    self.onQueueNewFile(null, queueFile)
   })
-  var i = 0
-  loop()
+  if (self.queue.length > 0 && !isWriting) _addFiles()
 
-  function loop () {
-    if (i === files.length) {
-      console.log('added files to ', archive.key.toString('hex'), files)
-      return onCompleteAll(null, files)
-    }
-    var file = files[i++]
+  function _addFiles () {
+    isWriting = true
+    var file = self.queue[0]
     var stream = fileReader(file)
     var entry = {
-      name: path.join(cwd, file.fullPath.slice(1)),
+      name: path.join(self.cwd, file.fullPath.slice(1)),
       mtime: Date.now(),
       ctime: Date.now()
     }
-    file.progressListener = progress({ length: stream.size, time: progressInterval })
-    onFileWriteBegin(null, file)
+    file.progressListener = progress({ length: stream.size, time: self.progressInterval })
+    self.onFileWriteBegin(null, file)
     pump(
       stream,
-      chunker(chunkSize),
+      chunker(self.chunkSize),
       file.progressListener,
-      archive.createFileWriteStream(entry),
+      self.archive.createFileWriteStream(entry),
       function (err) {
         if (err) {
           file.writeError = true
-          onFileWriteComplete(err, file)
+          self.onFileWriteComplete(err, file)
         } else {
           file.progress = { complete: true }
-          onFileWriteComplete(null, file)
+          self.onFileWriteComplete(null, file)
         }
-        loop()
+        self.queue.splice(0,1)
+        if (self.queue.length === 0) {
+          isWriting = false
+          console.log('added files to ', self.archive.key.toString('hex'), files)
+          return self.onCompleteAll(null, files)
+        } else {
+          return _addFiles()
+        }
       }
     )
   }

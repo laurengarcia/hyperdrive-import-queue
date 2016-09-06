@@ -20,6 +20,7 @@ function HyperdriveImportQueue (files, archive, options) {
   this.cwd = options.cwd || ''
   this.chunkSize = options.chunkSize || 4*1024
   this.progressInterval = options.progressInterval || 100
+  this.isWriting = false
 
   this.onQueueNewFile = options.onQueueNewFile || noop
   this.onFileWriteBegin = options.onFileWriteBegin || noop
@@ -31,17 +32,16 @@ function HyperdriveImportQueue (files, archive, options) {
 
 HyperdriveImportQueue.prototype.add = function (files, cwd) {
   var self = this
-  var isWriting = false
   if (cwd) this.cwd = cwd
   files.forEach(function (file) {
     var queueFile = new QueuedFileModel(file)
     self.queue.push(queueFile)
     self.onQueueNewFile(null, queueFile)
   })
-  if (self.queue.length > 0 && !isWriting) _addFiles()
+  if (self.queue.length > 0 && !this.isWriting) _addFiles()
 
   function _addFiles () {
-    isWriting = true
+    self.isWriting = true
     var file = self.queue[0]
     var stream = fileReader(file)
     var entry = {
@@ -66,8 +66,7 @@ HyperdriveImportQueue.prototype.add = function (files, cwd) {
         }
         self.queue.splice(0,1)
         if (self.queue.length === 0) {
-          isWriting = false
-          console.log('added files to ', self.archive.key.toString('hex'), files)
+          self.isWriting = false
           return self.onCompleteAll(null, files)
         } else {
           return _addFiles()

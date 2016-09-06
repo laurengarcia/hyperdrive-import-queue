@@ -8,7 +8,7 @@ function QueuedFileModel (file) {
   this.file.progress = null
   this.file.progressListener = null
   this.file.progressHandler = null
-  this.file.writeError = false
+  this.file.importError = false
 
   if (!this._validateProps()) {
     throw new Error('[QueuedFileModel] file is missing one or more properties')

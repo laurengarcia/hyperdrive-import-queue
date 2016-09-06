@@ -58,7 +58,7 @@ HyperdriveImportQueue.prototype.add = function (files, cwd) {
       self.archive.createFileWriteStream(entry),
       function (err) {
         if (err) {
-          file.writeError = true
+          file.importError = true
           self.onFileWriteComplete(err, file)
         } else {
           file.progress = { complete: true }

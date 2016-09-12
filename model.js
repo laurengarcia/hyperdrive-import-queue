@@ -19,6 +19,6 @@ function QueuedFileModel (file) {
 
 QueuedFileModel.prototype._validateProps = function () {
   if (!this.file.fullPath) return false
-  if (!isFinite(this.file.size)) return false
+  if (!isFinite(this.file.size) || this.file.size < 0) return false
   return true
 }

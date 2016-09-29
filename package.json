@@ -1,6 +1,6 @@
 {
   "name": "hyperdrive-import-queue",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "A hyperdrive import queue that emits progress events.",
   "license": "MIT",
   "main": "index.js",
@@ -14,7 +14,8 @@
   "keywords": [
     "dat",
     "hyperdrive",
-    "progress"
+    "progress",
+    "import"
   ],
   "dependencies": {
     "choppa": "^1.0.2",
